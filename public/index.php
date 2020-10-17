@@ -31,15 +31,17 @@ $app->get('/search', function (Request $request, Response $response, $args) {
 
     foreach($decode->statuses as $status){
         $entry = $feed->createEntry();
-        $entry->setTitle(mb_strimwidth($status->full_text,0,50,'..'));
+        $title = mb_strimwidth($status->full_text,0,150,'..');
+        $entry->setTitle($title);
         $entry->setLink('https://twitter.com/'.$status->user->screen_name.'/status/'.$status->id_str);
         $entry->addAuthor([
             'name'  => $status->user->name,
         ]);
         $entry->setDateCreated(strtotime($status->created_at));
         $entry->setDateModified(strtotime($status->created_at));
-        $entry->setDescription($status->full_text);
-        $entry->setContent('<blockquote class="twitter-tweet" data-dnt="true"><a href="https://twitter.com/'.$status->user->screen_name.'/status/'.$status->id_str.'"></blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>');
+        $entry->setDescription($title);
+        //TODO
+        $entry->setContent('<pre>'.$status->full_text.'</pre>');
         $feed->addEntry($entry);
     }
     $response->getBody()->write($feed->export('rss'));
