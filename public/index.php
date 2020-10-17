@@ -7,13 +7,17 @@ use Slim\Factory\AppFactory;
 use Laminas\Feed\Writer\Feed;
 require __DIR__ . '/../vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createImmutable('../config/');
+$dotenv->load();
+
 $app = AppFactory::create();
+$aTwitterClient = new koulab\UltimateTwitter\Client();
 
+$app->get('/search', function (Request $request, Response $response, $args) use($aTwitterClient){
 
-$app->get('/search', function (Request $request, Response $response, $args) {
-    $aTwitterClient = new koulab\UltimateTwitter\Client();
     $aSearchResultBody = $aTwitterClient->get('https://api.twitter.com/1.1/search/tweets.json',[
-        'query'=>array_merge($request->getQueryParams(),['tweet_mode'=>'extended','result_type'=>'recent'])
+        'query'=>array_merge($request->getQueryParams(),['tweet_mode'=>'extended','result_type'=>'recent']),
+        'proxy'=>$_ENV['TWITTER_RSS_PROXY']
     ]);
     $decode = json_decode($aSearchResultBody);
 
